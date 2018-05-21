@@ -23,7 +23,7 @@ const double M_PI = 3.14159265358979323846;
  * Struct representing one position/control measurement.
  */
 struct control_s {
-	
+
 	double velocity;	// Velocity [m/s]
 	double yawrate;		// Yaw rate [rad/s]
 };
@@ -32,7 +32,7 @@ struct control_s {
  * Struct representing one ground truth position.
  */
 struct ground_truth {
-	
+
 	double x;		// Global vehicle x position [m]
 	double y;		// Global vehicle y position
 	double theta;	// Global vehicle yaw [rad]
@@ -42,7 +42,7 @@ struct ground_truth {
  * Struct representing one landmark observation measurement.
  */
 struct LandmarkObs {
-	
+
 	int id;				// Id of matching landmark in the map.
 	double x;			// Local (vehicle coordinates) x position of landmark observation [m]
 	double y;			// Local (vehicle coordinates) y position of landmark observation [m]
@@ -70,6 +70,22 @@ inline double * getError(double gt_x, double gt_y, double gt_theta, double pf_x,
 	return error;
 }
 
+/* Transforms from coordinates from observation coordinates to map coordinates
+ * @param (x1,y1,theta) x, y and theta in map coordinates of the observer
+ * @param (x2,y2) x, y coordinates of the observation in observations coordinates
+ * @output vector with x, y coordinates of the observation in map coordinates
+ */
+
+inline std::vector<double> transform_obs2map(double x1, double y1, double theta, double x2, double y2) {
+
+    std::vector<double> res;
+    res.push_back(x1 + cos(theta)*x2 - sin(theta)*y2);
+    res.push_back(y1 + sin(theta)*x2 + cos(theta)*y2);
+
+    return res;
+}
+
+
 /* Reads map data from a file.
  * @param filename Name of file containing map data.
  * @output True if opening and reading file was successful
@@ -82,7 +98,7 @@ inline bool read_map_data(std::string filename, Map& map) {
 	if (!in_file_map) {
 		return false;
 	}
-	
+
 	// Declare single line of map file:
 	std::string line_map;
 
@@ -146,7 +162,7 @@ inline bool read_control_data(std::string filename, std::vector<control_s>& posi
 		iss_pos >> velocity;
 		iss_pos >> yawrate;
 
-		
+
 		// Set values
 		meas.velocity = velocity;
 		meas.yawrate = yawrate;
@@ -182,7 +198,7 @@ inline bool read_gt_data(std::string filename, std::vector<ground_truth>& gt) {
 		double x, y, azimuth;
 
 		// Declare single ground truth:
-		ground_truth single_gt; 
+		ground_truth single_gt;
 
 		//read data from line to values:
 		iss_pos >> x;
